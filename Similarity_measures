@@ -1,0 +1,39 @@
+## Cosine Similarity
+
+app1_stop_words = stop_list_job + stop_list_resume
+from sklearn.metrics.pairwise import cosine_similarity
+
+
+#from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import *
+vectorizer5 = CountVectorizer()
+vectorizer5.fit(app1_stop_words)
+
+#print(vectorizer5.vocabulary_)
+
+v_c3 = vectorizer5.transform(app1_stop_words).toarray()
+# print(v_c3)
+
+for i in range(10):
+    cosine_similarity([v_c3[0,:]],[v_c3[1,:]])
+    
+# jaccard_similarity_score(v_c3[0,:],v_c3[1,:])
+
+L = []
+for i in range(678):
+    L.append(cosine_similarity([v_c3[648,:]],[v_c3[700+i,:]])[0][0])
+
+L.index(max(L)) 
+
+
+
+
+
+
+
+
+
+
+
+
