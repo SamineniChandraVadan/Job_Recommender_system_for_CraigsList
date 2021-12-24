@@ -1,0 +1,120 @@
+# pip install sentence-transformers
+
+
+
+from sentence_transformers import SentenceTransformer, util
+import numpy as np
+
+model = SentenceTransformer('stsb-roberta-large')
+
+
+
+import pandas as pd
+
+job_postings = pd.read_excel("job_postings.xlsx")
+job_postings.columns = ["Id","Description"]
+job_postings = job_postings[job_postings["Description"] != "kedYour request"]
+str1 = '\n'
+
+job_postings["Description"] = job_postings["Description"].str.replace(str1,"")
+job_postings.head()
+
+
+
+
+
+
+
+resume_postings = pd.read_excel( "resume_postings.xlsx")
+resume_postings.columns = ["Id","Description"]
+str1 = '\n\nQR Code Link to This Post\n\n\n'
+str2 = '\n'
+str3 = '\t'
+
+
+
+resume_postings["Description"] = resume_postings["Description"].str.replace(str1,"")
+resume_postings["Description"] = resume_postings["Description"].str.replace(str2,"")
+resume_postings["Description"] = resume_postings["Description"].str.replace(str3,"")
+resume_postings.head()
+
+
+
+sentence1 = "I like Python because I can build AI applications"
+sentence2 = "I like Python because I can do data analytics"
+# encode sentences to get their embeddings
+embedding1 = model.encode(sentence1, convert_to_tensor=True)
+embedding2 = model.encode(sentence2, convert_to_tensor=True)
+# compute similarity scores of two embeddings
+cosine_scores = util.pytorch_cos_sim(embedding1, embedding2)
+print("Sentence 1:", sentence1)
+print("Sentence 2:", sentence2)
+print("Similarity score:", cosine_scores.item())
+
+
+
+
+
+
+
+
+
+job_list = list(job_postings['Description'])
+resume_list = list(resume_postings['Description'])
+#resume_list.head()
+
+
+
+
+
+
+job_embeddings = model.encode(job_list, convert_to_tensor=True)
+resume_embeddings = model.encode(resume_list, convert_to_tensor=True)
+
+
+
+
+
+
+# top_k results to return
+top_k=10
+
+recommendations = [[]*top_k for i in range(len(job_list))]
+
+for i in range(len(job_list)):
+
+  # compute similarity scores of the sentence with the corpus
+  cos_scores = util.pytorch_cos_sim(job_embeddings[i], resume_embeddings)[0]
+
+  # Sort the results in decreasing order and get the first top_k
+  top_results = np.argpartition(-cos_scores, range(top_k))[0:top_k]
+  for idx in top_results[0:top_k]:
+    recommendations[i].append(resume_list.index(resume_list[idx]))
+
+
+print("Sentence:", job_list[1], "\n")
+print("Top", top_k, "most similar sentences in corpus:")
+for idx in top_results[0:top_k]:
+    print(resume_list.index(resume_list[idx]), "(Score: %.4f)" % (cos_scores[idx]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
