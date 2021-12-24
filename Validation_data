@@ -1,0 +1,47 @@
+
+
+### Creating the validation set using k-means
+from sklearn.cluster import KMeans
+
+true_k = 10
+model_job = KMeans(n_clusters = true_k)
+model_job.fit(v4_job)
+
+order_centroids_job = model_job.cluster_centers_.argsort()[:,::-1]
+terms = v1_job.get_feature_names()
+
+#for ind in order_centroids[0, :5]:
+#    print(terms[ind])
+    
+
+for i in range(true_k):
+    l = []
+    for ind in order_centroids_job[i, :4]:
+        l.append(terms[ind])
+    print(l)
+
+
+v1_resume = TfidfVectorizer(ngram_range = (1,5),min_df = 6)
+v1_resume.fit(stop_list_resume)
+v4_resume = v1_resume.transform(stop_list_resume)
+
+
+
+
+from sklearn.cluster import KMeans
+
+true_k = 10
+model_resume = KMeans(n_clusters = true_k)
+model_resume.fit(v4_resume)
+
+order_centroids = model_resume.cluster_centers_.argsort()[:,::-1]
+terms = v1_resume.get_feature_names()
+
+#for ind in order_centroids[0, :5]:
+#    print(terms[ind])
+
+for i in range(true_k):
+    l = []
+    for ind in order_centroids[i, :4]:
+        l.append(terms[ind])
+    print(l)
