@@ -1,0 +1,100 @@
+
+### Job Postings
+
+vectorizer7 = CountVectorizer(ngram_range = (1,4),min_df = 5)
+v2 = vectorizer7.fit_transform(stop_list_job)
+terms = vectorizer7.get_feature_names()
+
+
+counts = pd.DataFrame(v2.toarray(),
+                      columns=vectorizer7.get_feature_names())
+job_words = pd.DataFrame(counts.agg(sum)).sort_values(by = 0,ascending = False)    
+#resume_words.reset_index()
+
+#print(resume_words.iloc[:10])
+#print(resume_words.index)
+import seaborn as sns
+
+plt.bar(job_words.iloc[:5].index,job_words.iloc[:5][0])
+plt.xlabel("words")
+plt.ylabel("frequency")
+plt.title("Job postings word frequency")
+plt.show()
+#resume_words.iloc[:5]
+
+
+
+
+### Resume Postings
+
+vectorizer7 = CountVectorizer(ngram_range = (1,4),min_df = 5)
+v2 = vectorizer7.fit_transform(stop_list_resume)
+terms = vectorizer7.get_feature_names()
+
+
+counts_job = pd.DataFrame(v2.toarray(),
+                      columns=vectorizer7.get_feature_names())
+resume_words = pd.DataFrame(counts_job.agg(sum)).sort_values(by = 0,ascending = False)    
+#resume_words.reset_index()
+
+import seaborn as sns
+plt.xlabel("words")
+plt.ylabel("frequency")
+plt.title("Resume postings word frequency")
+plt.bar(resume_words.iloc[:5].index,resume_words.iloc[:5][0])
+plt.show()
+
+
+
+
+
+
+
+
+### LDA Modelling
+
+### LDA on Job postings
+vectorizer7 = CountVectorizer(ngram_range = (1,4),min_df = 5)
+v2 = vectorizer7.fit_transform(stop_list_job)
+terms = vectorizer7.get_feature_names()
+
+lda = LatentDirichletAllocation(n_components = 6).fit(v2)
+
+
+
+Topic = []
+for topic_idx, topic in enumerate(lda.components_):
+    print("Topic %d:" % (topic_idx))    
+    print(" ".join([terms[i] for i in topic.argsort()[:-6:-1]]))
+    Topic.append(" ".join([terms[i] for i in topic.argsort()[:-5:-1]]))
+
+
+
+### LDA on resume postings
+
+vectorizer7 = CountVectorizer(ngram_range = (1,4),min_df = 5)
+v2 = vectorizer7.fit_transform(stop_list_resume)
+terms = vectorizer7.get_feature_names()
+
+lda = LatentDirichletAllocation(n_components = 6).fit(v2)
+
+
+Topic = []
+for topic_idx, topic in enumerate(lda.components_):
+    print("Topic %d:" % (topic_idx))    
+    print(" ".join([terms[i] for i in topic.argsort()[:-6:-1]]))
+    Topic.append(" ".join([terms[i] for i in topic.argsort()[:-5:-1]]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
