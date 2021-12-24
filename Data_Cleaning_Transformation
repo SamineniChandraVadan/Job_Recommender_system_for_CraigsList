@@ -1,0 +1,123 @@
+import pandas as pd
+import matplotlib .pyplot as plt
+
+job_postings.columns = ["Id","Description"]
+job_postings = job_postings[job_postings["Description"] != "kedYour request"]
+str1 = '\n'
+job_postings["Description"] = job_postings["Description"].str.replace(str1,"")
+
+
+
+resume_postings.columns = ["Id","Description"]
+str1 = '\n\nQR Code Link to This Post\n\n\n'
+str2 = '\n'
+str3 = '\t'
+resume_postings["Description"] = resume_postings["Description"].str.replace(str1,"")
+resume_postings["Description"] = resume_postings["Description"].str.replace(str2,"")
+resume_postings["Description"] = resume_postings["Description"].str.replace(str3,"")
+
+
+import nltk
+from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
+
+### JOB TFIDF
+
+
+job_list = list(job_postings['Description'])
+tokenized_job_list = []
+
+
+
+for i in range(len(job_list)) :
+    tokenized_job_list.append(nltk.word_tokenize(job_list[i]))
+    
+lemmatizer = nltk.stem.WordNetLemmatizer()
+## Initiating the token list
+lemmatized_token = list()
+
+for i in range(len(tokenized_job_list)):
+    lemmatized_token.append([lemmatizer.lemmatize(token).lower() for token in tokenized_job_list[i] if token.isalnum()])
+
+    
+    
+    
+from nltk.corpus import stopwords
+stop_words_removed_job = list()
+
+for i in range(len(lemmatized_token)):
+    stop_words_removed_job.append([token for token in lemmatized_token[i] if not token in stopwords.words('english') if token.isalnum()])
+
+    
+stop_list_job = [None]*len(stop_words_removed_job)
+for i in range(len(stop_words_removed_job)):
+    stop_list_job[i] = " ".join(stop_words_removed_job[i])
+
+    
+v1_job = TfidfVectorizer(ngram_range = (1,5),min_df = 6)
+v1_job.fit(stop_list_job)
+v4_job = v1_job.transform(stop_list_job)
+
+
+
+##### Resume TFIDF
+
+resume_list = list(resume_postings['Description'])
+tokenized_resume_list = []
+
+
+for i in range(len(resume_list)) :
+    tokenized_resume_list.append(nltk.word_tokenize(resume_list[i]))
+    
+lemmatizer = nltk.stem.WordNetLemmatizer()
+## Initiating the token list
+lemmatized_token = list()
+
+for i in range(len(tokenized_resume_list)):
+    lemmatized_token.append([lemmatizer.lemmatize(token).lower() for token in tokenized_resume_list[i] if token.isalnum()])
+    
+    
+from nltk.corpus import stopwords
+stop_words_removed_resume = list()
+
+for i in range(len(lemmatized_token)):
+    stop_words_removed_resume.append([token for token in lemmatized_token[i] if not token in stopwords.words('english') if token.isalnum()])
+
+    
+stop_list_resume = [None]*len(stop_words_removed_resume)
+for i in range(len(stop_words_removed_resume)):
+    stop_list_resume[i] = " ".join(stop_words_removed_resume[i])
+
+    
+v1_resume = TfidfVectorizer(ngram_range = (1,5),min_df = 6)
+v1_resume.fit(stop_list_resume)
+v4_resume = v1_resume.transform(stop_list_resume)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
