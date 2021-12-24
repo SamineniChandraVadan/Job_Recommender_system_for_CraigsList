@@ -1,0 +1,138 @@
+## Kmeans
+
+
+app1_stop_words = stop_list_job + stop_list_resume
+
+
+v1_app1 = TfidfVectorizer(ngram_range = (1,5),min_df = 6)
+v1_app1.fit(app1_stop_words)
+v4_app1 = v1_app1.transform(app1_stop_words)
+#v1_app1.get_feature_names()
+
+
+
+
+true_k = 10
+model_app1 = KMeans(n_clusters = true_k)
+model_app1.fit(v4_app1)
+
+order_centroids_app1 = model_app1.cluster_centers_.argsort()[:,::-1]
+terms = v1_app1.get_feature_names()
+
+#for ind in order_centroids[0, :5]:
+#    print(terms[ind])
+
+for i in range(true_k):
+    l = []
+    for ind in order_centroids_app1[i, :4]:
+        l.append(terms[ind])
+    print(l)
+    
+    
+    
+    
+    
+    
+#print(model_app1.cluster_centers_)
+model_app1_clusters = model_app1.labels_.tolist()
+
+#print(model_app1_clusters)
+
+job_clustures = model_app1_clusters[:700]
+resume_clustures = model_app1_clusters[700:]
+
+
+resume_postings["clusture"] = resume_clustures
+job_postings["clusture"] = job_clustures
+K_means_sol = pd.merge(resume_postings,job_postings, how = "inner",on = "clusture")
+
+
+
+
+
+#####        WARNING : TAKES A LOONNNGGG TIME TO RUN          ########
+import numpy as np
+top5clusterscores=[]
+for cluster in [0,3,4,6,8]:
+    job_resume_cluster_similarity = pd.DataFrame(K_means_sol[K_means_sol["clusture"]==cluster]["Description_x"])
+    job_resume_cluster_similarity["Description_y"] = K_means_sol[K_means_sol["clusture"]==cluster]["Description_y"]
+    job_resume_list_clust = list(job_resume_cluster_similarity["Description_y"])
+    job_resume_list_clust.extend(list(job_resume_cluster_similarity["Description_x"]))
+    
+vectorizer5 = CountVectorizer()
+vec_clust = vectorizer5.fit_transform(job_resume_list_clust).toarray()
+
+#Compare
+L = []
+for i in range(len(job_resume_cluster_similarity)):
+        L.append([cosine_similarity([vec_clust[i]],[vec_clust[len(job_resume_cluster_similarity)-2+j,:]])[0][0] for j in range(len(job_resume_cluster_similarity))])
+
+        # Calculate mean of top 5 job matches for each resume
+top5forcluster=[]
+for i in range(len(L)):
+    L[i].sort()
+    top5forcluster.append(np.mean(L[i][-5:]))
+top5clusterscores.append(top5forcluster)
+
+
+
+
+
+
+################## 2.B Agglomerative Clustering
+
+
+
+
+from sklearn.cluster import AgglomerativeClustering
+model2 = AgglomerativeClustering(n_clusters=20,affinity='euclidean', linkage='ward')
+model2.fit_predict(v4_app1.toarray())
+
+model_agg_clusters = model2.labels_.tolist()
+job_clusters_agg = model_agg_clusters[:700]
+resume_clusters_agg = model_agg_clusters[700:]
+
+resume_postings["aggCluster"] = resume_clusters_agg
+job_postings["aggCluster"] = job_clusters_agg
+aggCluster_sol = pd.merge(resume_postings,job_postings, how = "inner",on = "aggCluster")
+
+
+
+
+
+
+#####        WARNING : TAKES EVEN LOONNNGGG TIME TO RUN          ########
+
+top5Aggclusterscores=[]
+for cluster in [0]:
+    job_resume_cluster_similarity = pd.DataFrame(aggCluster_sol[aggCluster_sol["aggCluster"]==cluster]["Description_x"])
+    job_resume_cluster_similarity["Description_y"] = aggCluster_sol[aggCluster_sol["aggCluster"]==cluster]["Description_y"]
+    job_resume_list_clust = list(job_resume_cluster_similarity["Description_y"])
+    job_resume_list_clust.extend(list(job_resume_cluster_similarity["Description_x"]))
+
+    vectorizer5 = CountVectorizer()
+    vec_clust = vectorizer5.fit_transform(job_resume_list_clust).toarray()
+
+    #Compare
+    ls = []
+    for i in range(len(job_resume_cluster_similarity)):
+            ls.append([cosine_similarity([vec_clust[i]],[vec_clust[len(job_resume_cluster_similarity)-2+j,:]])[0][0] for j in range(len(job_resume_cluster_similarity))])
+
+            # Get mean of top 5 matched jobs for each resume in the cluster
+    top5forcluster=[]
+    for i in range(len(ls)):
+        ls[i].sort()
+        top5forcluster.append(np.mean(ls[i][-5:]))
+    top5Aggclusterscores.append(top5forcluster)
+
+
+
+
+
+
+
+
+    
+    
+    
+    
